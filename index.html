@@ -1,4 +1,53 @@
-<!DOCTYPE html>
+// OpenWeather API用のプロキシURL
+    // ここにGAS/Cloudflare WorkersなどのプロキシサーバーのURLを設定
+    const WEATHER_PROXY_URL = 'https://script.google.com/macros/s/AKfycbw4Ui2_t2apG-ZUa1x827rC1oy9eG6cxavU__UqPzqiKsNtECETn3moWOEafRt8m8hm/exec';
+    
+    // 現在の天気情報を取得
+    async function getCurrentWeather(cityName) {
+      const url = `${WEATHER_PROXY_URL}/current?city=${encodeURIComponent(cityName)}`;
+      
+      try {
+        const response = await fetch(url);
+        
+        if (!response.ok) {
+          throw new Error('地域名が正しくないか、サーバーとの通信に問題があります');
+        }
+        
+        const data = await response.json();
+        
+        return {
+          weather: data.weather[0].description,
+          pressure: data.main.pressure,
+          temperature: Math.round(data.main.temp * 10) / 10,
+          humidity: data.main.humidity,
+          icon: data.weather[0].icon
+        };
+      } catch (error) {
+        console.error('現在の天気取得エラー:', error);
+        throw error;
+      }
+    }
+    
+    // 天気予報を取得
+    async function getWeatherForecast(cityName) {
+      const url = `${WEATHER_PROXY_URL}/forecast?city=${encodeURIComponent(cityName)}`;
+      
+      try {
+        const response = await fetch(url);
+        
+        if (!response.ok) {
+          throw new Error('地域名が正しくないか、サーバーとの通信に問題があります');
+        }
+        
+        const data = await response.json();
+        
+        // 予報データを処理して今日と明日の情報を抽出
+        return processForecastData(data);
+      } catch (error) {
+        console.error('天気予報取得エラー:', error);
+        throw error;
+      }
+    }<!DOCTYPE html>
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
@@ -222,7 +271,7 @@
         
         <div id="risk-indicator" class="p-4 rounded-lg mb-6">
           <div class="flex items-center">
-            <img id="risk-icon" src="" alt="リスクレベル" class="w-16 h-16 mr-4">
+            <div id="risk-icon" class="w-16 h-16 mr-4 flex items-center justify-center text-3xl"></div>
             <div>
               <h3 class="text-lg font-bold" id="risk-level"></h3>
               <p id="risk-forecast" class="text-gray-700"></p>
@@ -350,12 +399,10 @@
       "46": [{name: "鹿児島市"}, {name: "霧島市"}, {name: "鹿屋市"}],
       "47": [{name: "那覇市"}, {name: "沖縄市"}, {name: "宮古島市"}]
     };
-    
+
     // LIFF初期化
     document.addEventListener('DOMContentLoaded', () => {
       console.log("DOM読み込み完了");
-      // 都道府県リストを先にセットアップ（静的HTMLに変更したためコメントアウト）
-      // setupPrefectureList();
       // その後LIFFを初期化
       initLiff();
     });
@@ -364,14 +411,21 @@
       // ここに実際のLIFF IDを設定してください
       const liffId = "2007239534-bnjnyNja";
       
-      liff.init({
-        liffId: liffId
-      }).then(() => {
-        console.log("LIFF initialized");
+      if (liff) {
+        liff.init({
+          liffId: liffId
+        }).then(() => {
+          console.log("LIFF initialized");
+          initApp();
+        }).catch((err) => {
+          console.error("LIFF initialization failed", err);
+          // LIFFの初期化に失敗しても、アプリは使えるようにする
+          initApp();
+        });
+      } else {
+        console.warn("LIFF is not available");
         initApp();
-      }).catch((err) => {
-        console.error("LIFF initialization failed", err);
-      });
+      }
     }
 
     function initApp() {
@@ -391,28 +445,6 @@
         // 自動検索前に対応する都道府県と市区町村を選択
         selectMatchingLocation(city);
       }
-    }
-
-    // 都道府県リストの設定（静的HTMLに変更したためコメントアウトされます）
-    function setupPrefectureList() {
-      console.log("都道府県リストのセットアップを開始");
-      const prefSelect = document.getElementById('prefecture');
-      
-      if (!prefSelect) {
-        console.error("prefecture要素が見つかりません");
-        return;
-      }
-      
-      // 都道府県の選択肢を追加
-      prefectures.forEach(pref => {
-        const option = document.createElement('option');
-        option.value = pref.code;
-        option.textContent = pref.name;
-        prefSelect.appendChild(option);
-        console.log(`追加: ${pref.name}`);
-      });
-      
-      console.log(`${prefectures.length}件の都道府県を追加しました`);
     }
 
     // 都道府県選択時の処理
@@ -464,7 +496,7 @@
       }
     }
 
-    // バックエンドAPIを使用して天気データを取得
+    // 天気データを取得
     async function fetchWeatherData() {
       const prefecture = document.getElementById('prefecture');
       const city = document.getElementById('city');
@@ -488,50 +520,41 @@
       try {
         console.log("検索地域:", location);
         
-        // バックエンドAPIのURL
-        const apiUrl = 'https://script.google.com/macros/s/AKfycbxQPCCC8XxNZFeyB_i2VqUSP8ZuaJoK9kuYcGJJR4RQ3ysPkDZrJV2fQ5Y4sx-afLJj/exec';
-        console.log("APIリクエスト:", `${apiUrl}?city=${encodeURIComponent(location)}`);
+        // 現在の天気を取得
+        const currentWeather = await getCurrentWeather(location);
         
-        const response = await fetch(`${apiUrl}?city=${encodeURIComponent(location)}`);
-        console.log("APIレスポンスステータス:", response.status);
+        // 5日間予報を取得
+        const forecast = await getWeatherForecast(location);
         
-        if (!response.ok) {
-          throw new Error('APIリクエストに失敗しました');
-        }
-        
-        const data = await response.json();
-        console.log("取得データ:", data);
-        
-        if (!data.success) {
-          throw new Error(data.error || '地域名が正しくありません');
-        }
+        // 頭痛リスク判定
+        const headacheRisk = judgeHeadacheRisk(currentWeather.pressure, currentWeather.weather);
         
         // 場所の表示
         document.getElementById('location-display').textContent = location;
         
         // 現在の天気情報を表示
-        document.getElementById('current-weather').textContent = data.currentWeather.weatherMain;
-        document.getElementById('current-temp').textContent = `${data.currentWeather.temperature}℃`;
-        document.getElementById('current-humidity').textContent = `${data.currentWeather.humidity}%`;
-        document.getElementById('current-pressure').textContent = `${data.currentWeather.pressure}hPa`;
+        document.getElementById('current-weather').textContent = currentWeather.weather;
+        document.getElementById('current-temp').textContent = `${currentWeather.temperature}℃`;
+        document.getElementById('current-humidity').textContent = `${currentWeather.humidity}%`;
+        document.getElementById('current-pressure').textContent = `${currentWeather.pressure}hPa`;
         
         // 予報情報を表示
-        if (data.forecast && data.forecast.today) {
-          document.getElementById('today-weather').textContent = data.forecast.today.weather;
-          document.getElementById('today-max-temp').textContent = `${data.forecast.today.maxTemp}℃`;
-          document.getElementById('today-min-temp').textContent = `${data.forecast.today.minTemp}℃`;
-          document.getElementById('today-pressure').textContent = `${data.forecast.today.avgPressure}hPa`;
+        if (forecast.today) {
+          document.getElementById('today-weather').textContent = forecast.today.weather;
+          document.getElementById('today-max-temp').textContent = `${forecast.today.maxTemp}℃`;
+          document.getElementById('today-min-temp').textContent = `${forecast.today.minTemp}℃`;
+          document.getElementById('today-pressure').textContent = `${forecast.today.avgPressure}hPa`;
         }
         
-        if (data.forecast && data.forecast.tomorrow) {
-          document.getElementById('tomorrow-weather').textContent = data.forecast.tomorrow.weather;
-          document.getElementById('tomorrow-max-temp').textContent = `${data.forecast.tomorrow.maxTemp}℃`;
-          document.getElementById('tomorrow-min-temp').textContent = `${data.forecast.tomorrow.minTemp}℃`;
-          document.getElementById('tomorrow-pressure').textContent = `${data.forecast.tomorrow.avgPressure}hPa`;
+        if (forecast.tomorrow) {
+          document.getElementById('tomorrow-weather').textContent = forecast.tomorrow.weather;
+          document.getElementById('tomorrow-max-temp').textContent = `${forecast.tomorrow.maxTemp}℃`;
+          document.getElementById('tomorrow-min-temp').textContent = `${forecast.tomorrow.minTemp}℃`;
+          document.getElementById('tomorrow-pressure').textContent = `${forecast.tomorrow.avgPressure}hPa`;
         }
         
         // 頭痛リスク表示
-        displayHeadacheRisk(data.headacheRisk);
+        displayHeadacheRisk(headacheRisk);
         
         // 結果表示
         showResult();
@@ -543,224 +566,148 @@
         showLoading(false);
       }
     }
+    
+    // 予報データを処理
+    function processForecastData(data) {
+      // 日付を取得
+      const today = new Date();
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      
+      const todayStr = today.toISOString().split('T')[0];
+      const tomorrowStr = tomorrow.toISOString().split('T')[0];
+      
+      // 今日と明日の予報データを抽出
+      const todayForecasts = data.list.filter(item => item.dt_txt.includes(todayStr));
+      const tomorrowForecasts = data.list.filter(item => item.dt_txt.includes(tomorrowStr));
+      
+      // 今日の予報
+      const todayResult = processDayForecast(todayForecasts);
+      
+      // 明日の予報
+      const tomorrowResult = processDayForecast(tomorrowForecasts);
+      
+      return {
+        today: todayResult,
+        tomorrow: tomorrowResult
+      };
+    }
+    
+    // 1日分の予報データを処理
+    function processDayForecast(forecasts) {
+      if (!forecasts || forecasts.length === 0) {
+        return null;
+      }
+      
+      // 最高気温と最低気温を計算
+      let maxTemp = -100;
+      let minTemp = 100;
+      let totalPressure = 0;
+      let weatherCounts = {};
+      
+      forecasts.forEach(forecast => {
+        // 気温の計算
+        if (forecast.main.temp_max > maxTemp) maxTemp = forecast.main.temp_max;
+        if (forecast.main.temp_min < minTemp) minTemp = forecast.main.temp_min;
+        
+        // 気圧の計算
+        totalPressure += forecast.main.pressure;
+        
+        // 天気の出現回数をカウント
+        const weather = forecast.weather[0].description;
+        weatherCounts[weather] = (weatherCounts[weather] || 0) + 1;
+      });
+      
+      // 最も多く出現する天気を取得
+      let mostFrequentWeather = '';
+      let maxCount = 0;
+      
+      for (const weather in weatherCounts) {
+        if (weatherCounts[weather] > maxCount) {
+          maxCount = weatherCounts[weather];
+          mostFrequentWeather = weather;
+        }
+      }
+      
+      // 平均気圧を計算
+      const avgPressure = Math.round(totalPressure / forecasts.length);
+      
+      return {
+        weather: mostFrequentWeather,
+        maxTemp: Math.round(maxTemp * 10) / 10,
+        minTemp: Math.round(minTemp * 10) / 10,
+        avgPressure: avgPressure
+      };
+    }
+    
+    // 頭痛リスクを判定
+    function judgeHeadacheRisk(pressure, weather) {
+      // 気圧による判定
+      let riskLevel = 'low';
+      let forecast = '';
+      let advice = '';
+      let iconEmoji = '😊';
+      let riskClass = 'risk-low';
+      
+      // 気圧が1000hPa未満、または急激な変化がある場合は高リスク
+      if (pressure < 1000) {
+        riskLevel = 'high';
+        forecast = '気圧が低く、頭痛が起こりやすい状態です。';
+        advice = '水分をこまめに取り、無理な外出は控えましょう。頭痛薬を携帯し、症状が出たらすぐに服用することをおすすめします。';
+        iconEmoji = '😖';
+        riskClass = 'risk-high';
+      } 
+      // 1000hPa以上1013hPa未満は中リスク
+      else if (pressure < 1013) {
+        riskLevel = 'medium';
+        forecast = '気圧がやや低く、頭痛の可能性があります。';
+        advice = '疲労を溜めないよう休息を取り、水分補給を忘れずに行いましょう。';
+        iconEmoji = '😐';
+        riskClass = 'risk-medium';
+      } 
+      // 1013hPa以上は低リスク
+      else {
+        riskLevel = 'low';
+        forecast = '気圧が安定しており、頭痛のリスクは低めです。';
+        advice = '普段通りの生活を心がけ、十分な睡眠と水分補給を意識しましょう。';
+        iconEmoji = '😊';
+        riskClass = 'risk-low';
+      }
+      
+      // 天気による補正
+      if (weather.includes('雨') || weather.includes('曇')) {
+        // 雨や曇りの場合はリスクを上げる
+        if (riskLevel === 'low') {
+          riskLevel = 'medium';
+          forecast = '天気が悪く、頭痛の可能性があります。';
+          advice = '急な天候の変化に注意し、こまめに休憩を取りましょう。';
+          iconEmoji = '😐';
+          riskClass = 'risk-medium';
+        } else if (riskLevel === 'medium') {
+          riskLevel = 'high';
+          forecast = '天気が悪く、気圧も不安定で頭痛リスクが高い状態です。';
+          advice = '外出はなるべく控え、室内で過ごすことをおすすめします。頭痛薬を携帯しておきましょう。';
+          iconEmoji = '😖';
+          riskClass = 'risk-high';
+        }
+      }
+      
+      return {
+        level: riskLevel === 'high' ? '高い' : (riskLevel === 'medium' ? '中程度' : '低い'),
+        forecast: forecast,
+        advice: advice,
+        icon: iconEmoji,
+        class: riskClass
+      };
+    }
 
     // 頭痛リスクの表示
     function displayHeadacheRisk(condition) {
       const riskIndicator = document.getElementById('risk-indicator');
       riskIndicator.className = `p-4 rounded-lg mb-6 ${condition.class}`;
       
-      document.getElementById('risk-icon').src = condition.imageUrl;
+      document.getElementById('risk-icon').innerHTML = condition.icon;
       document.getElementById('risk-level').textContent = `頭痛リスク：${condition.level}`;
       document.getElementById('risk-forecast').textContent = condition.forecast;
       document.getElementById('risk-advice').textContent = condition.advice;
     }
-
-    // チャットに結果を送信する
-    function sendResultToChat() {
-      if (liff.isInClient()) {
-        const location = document.getElementById('location-display').textContent;
-        const riskLevel = document.getElementById('risk-level').textContent;
-        const riskForecast = document.getElementById('risk-forecast').textContent;
-        const riskAdvice = document.getElementById('risk-advice').textContent;
-        
-        // 現在の天気情報
-        const currentWeather = document.getElementById('current-weather').textContent;
-        const currentTemp = document.getElementById('current-temp').textContent;
-        const currentHumidity = document.getElementById('current-humidity').textContent;
-        const currentPressure = document.getElementById('current-pressure').textContent;
-        
-        // メッセージ作成
-        const message = {
-          type: "flex",
-          altText: `${location}の頭痛予報`,
-          contents: {
-            type: "bubble",
-            header: {
-              type: "box",
-              layout: "vertical",
-              contents: [
-                {
-                  type: "text",
-                  text: "頭痛予報",
-                  weight: "bold",
-                  color: "#1F76DC",
-                  size: "xl"
-                }
-              ]
-            },
-            hero: {
-              type: "box",
-              layout: "vertical",
-              contents: [
-                {
-                  type: "text",
-                  text: location,
-                  weight: "bold",
-                  size: "xl",
-                  margin: "md"
-                },
-                {
-                  type: "text",
-                  text: riskLevel,
-                  size: "lg",
-                  color: "#555555",
-                  margin: "md"
-                }
-              ]
-            },
-            body: {
-              type: "box",
-              layout: "vertical",
-              contents: [
-                {
-                  type: "box",
-                  layout: "vertical",
-                  margin: "lg",
-                  spacing: "sm",
-                  contents: [
-                    {
-                      type: "box",
-                      layout: "baseline",
-                      spacing: "sm",
-                      contents: [
-                        {
-                          type: "text",
-                          text: "天気",
-                          color: "#aaaaaa",
-                          size: "sm",
-                          flex: 2
-                        },
-                        {
-                          type: "text",
-                          text: currentWeather,
-                          wrap: true,
-                          color: "#666666",
-                          size: "sm",
-                          flex: 5
-                        }
-                      ]
-                    },
-                    {
-                      type: "box",
-                      layout: "baseline",
-                      spacing: "sm",
-                      contents: [
-                        {
-                          type: "text",
-                          text: "気温",
-                          color: "#aaaaaa",
-                          size: "sm",
-                          flex: 2
-                        },
-                        {
-                          type: "text",
-                          text: currentTemp,
-                          wrap: true,
-                          color: "#666666",
-                          size: "sm",
-                          flex: 5
-                        }
-                      ]
-                    },
-                    {
-                      type: "box",
-                      layout: "baseline",
-                      spacing: "sm",
-                      contents: [
-                        {
-                          type: "text",
-                          text: "気圧",
-                          color: "#aaaaaa",
-                          size: "sm",
-                          flex: 2
-                        },
-                        {
-                          type: "text",
-                          text: currentPressure,
-                          wrap: true,
-                          color: "#666666",
-                          size: "sm",
-                          flex: 5
-                        }
-                      ]
-                    }
-                  ]
-                },
-                {
-                  type: "separator",
-                  margin: "lg"
-                },
-                {
-                  type: "box",
-                  layout: "vertical",
-                  margin: "lg",
-                  contents: [
-                    {
-                      type: "text",
-                      text: riskForecast,
-                      size: "sm",
-                      wrap: true
-                    },
-                    {
-                      type: "text",
-                      text: "【対処法】",
-                      margin: "md",
-                      size: "sm",
-                      weight: "bold"
-                    },
-                    {
-                      type: "text",
-                      text: riskAdvice,
-                      margin: "sm",
-                      size: "sm",
-                      wrap: true
-                    }
-                  ]
-                }
-              ]
-            },
-            styles: {
-              header: {
-                backgroundColor: "#f0f8ff"
-              }
-            }
-          }
-        };
-        
-        // チャットに送信
-        liff.sendMessages([message])
-          .then(() => {
-            alert("頭痛予報をチャットに送信しました");
-          })
-          .catch((error) => {
-            console.error("Error sending message: ", error);
-            alert("送信に失敗しました。もう一度お試しください。");
-          });
-      } else {
-        alert("このブラウザではチャット送信機能をご利用いただけません。LINE内で開いてください。");
-      }
-    }
-
-    // UI表示切替関数
-    function showLoading(show) {
-      document.getElementById('loading').style.display = show ? 'flex' : 'none';
-    }
-
-    function showResult() {
-      document.getElementById('result-section').style.display = 'block';
-    }
-
-    function hideResult() {
-      document.getElementById('result-section').style.display = 'none';
-    }
-
-    function showError() {
-      document.getElementById('error-message').style.display = 'block';
-    }
-
-    function hideError() {
-      document.getElementById('error-message').style.display = 'none';
-    }
-  </script>
-</body>
-</html>
