@@ -489,7 +489,7 @@
         console.log("検索地域:", location);
         
         // バックエンドAPIのURL
-        const apiUrl = 'https://script.google.com/macros/s/AKfycbxPym8hGAHDmmj39o2SiC4cVxnk092_Jkj8BXWmdmL3iq5GCiHmDgOTjJ_ht9nTPUG1/exec';
+        const apiUrl = 'https://script.google.com/macros/s/AKfycbzihTRZHpstgciqIiPHaR-4lZqQAwnTSSF3zCGTQ0VC6_wcO2ONky_gc77IALhgI3r_/exec';
         console.log("APIリクエスト:", `${apiUrl}?city=${encodeURIComponent(location)}`);
         
         const response = await fetch(`${apiUrl}?city=${encodeURIComponent(location)}`);
