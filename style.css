@@ -1,0 +1,39 @@
+/* カスタムスタイル */
+
+/* 頭痛リスクレベル表示 */
+.risk-high {
+  background-color: #FECACA;
+  border-left: 6px solid #EF4444;
+}
+
+.risk-medium {
+  background-color: #FEF3C7;
+  border-left: 6px solid #F59E0B;
+}
+
+.risk-low {
+  background-color: #D1FAE5;
+  border-left: 6px solid #10B981;
+}
+
+/* ボタン遷移アニメーション */
+.transition {
+  transition: all 0.3s ease;
+}
+
+/* 現在地ボタンのホバーエフェクト */
+#geolocation-btn:hover svg {
+  transform: scale(1.1);
+}
+
+/* 都道府県ボタン選択状態 */
+.prefecture-btn.selected {
+  background-color: #BFDBFE;
+  border-color: #3B82F6;
+  font-weight: 500;
+}
+
+/* 都道府県ボタンのホバーエフェクト */
+.prefecture-btn:hover {
+  transform: translateY(-1px);
+}
