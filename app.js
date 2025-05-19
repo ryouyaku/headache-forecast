@@ -6,7 +6,7 @@
 // グローバル設定
 const CONFIG = {
   // GASのデプロイURLに置き換えてください
-  API_ENDPOINT: 'https://script.google.com/macros/s/AKfycbxiAwzTctWuWxOb8WE5p0pvGCtuNisUYU7CkT_s7qw1bGYwp90pp3M5NUT22uUZqFMW/exec',
+  API_ENDPOINT: 'https://script.google.com/macros/s/AKfycbxcoQzRLrvqUzJ6-1tXVC4YNcdZCfmtjA0ZnAfuSX0Z29bcUTf-80L041oRSjF1-1HO/exec',
   LIFF_ID: '2007239534-bnjnyNja', // LIFFアプリのIDに置き換えてください
   DEBUG_MODE: false
 };
