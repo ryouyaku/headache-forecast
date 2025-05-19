@@ -1,4 +1,4 @@
-/* カスタムスタイル */
+/* シンプルな頭痛予報アプリのスタイル */
 
 /* 頭痛リスクレベル表示 */
 .risk-high {
@@ -16,24 +16,17 @@
   border-left: 6px solid #10B981;
 }
 
-/* ボタン遷移アニメーション */
-.transition {
+/* ボタンのホバーエフェクト */
+button:hover {
+  transform: translateY(-2px);
   transition: all 0.3s ease;
 }
 
-/* 現在地ボタンのホバーエフェクト */
-#geolocation-btn:hover svg {
-  transform: scale(1.1);
-}
-
-/* 都道府県ボタン選択状態 */
-.prefecture-btn.selected {
-  background-color: #BFDBFE;
-  border-color: #3B82F6;
-  font-weight: 500;
-}
-
-/* 都道府県ボタンのホバーエフェクト */
-.prefecture-btn:hover {
-  transform: translateY(-1px);
+/* セレクトボックスのカスタムスタイル */
+select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 0.5rem center;
+  background-repeat: no-repeat;
+  background-size: 1.5em 1.5em;
 }
