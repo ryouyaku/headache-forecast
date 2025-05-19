@@ -16,57 +16,72 @@
       <p class="text-gray-600 mt-2">お住まいの地域の天気から頭痛リスクを予測します</p>
     </header>
 
-    <!-- 検索フォーム -->
+    <!-- シンプル化された検索フォーム -->
     <div id="search-section" class="bg-white rounded-lg shadow-lg p-6 mb-8">
       <div class="mb-6">
-        <label for="location-input" class="block text-gray-700 font-medium mb-2">地域</label>
-        <div class="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-4">
-          <!-- ロケーション検索 -->
-          <div class="flex-grow">
-            <input 
-              id="location-input" 
-              type="text" 
-              class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
-              placeholder="都道府県・市区町村を入力"
-              list="location-suggestions"
-            >
-            <datalist id="location-suggestions">
-              <!-- JavaScript で動的に追加 -->
-            </datalist>
-          </div>
-          
-          <!-- 現在地取得ボタン -->
-          <button 
-            id="geolocation-btn" 
-            class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition duration-300"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline mr-1" viewBox="0 0 20 20" fill="currentColor">
-              <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
-            </svg>
-            現在地を使用
-          </button>
-        </div>
+        <label for="city-select" class="block text-gray-700 font-medium mb-2">地域を選択</label>
+        <select 
+          id="city-select" 
+          class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300"
+        >
+          <option value="">地域を選択してください</option>
+          <!-- 主要都市グループ -->
+          <optgroup label="主要都市">
+            <option value="東京">東京</option>
+            <option value="大阪">大阪</option>
+            <option value="名古屋">名古屋</option>
+            <option value="札幌">札幌</option>
+            <option value="福岡">福岡</option>
+            <option value="横浜">横浜</option>
+          </optgroup>
+          <!-- 関東地方 -->
+          <optgroup label="関東地方">
+            <option value="千代田区">千代田区</option>
+            <option value="新宿区">新宿区</option>
+            <option value="渋谷区">渋谷区</option>
+            <option value="港区">港区</option>
+            <option value="台東区">台東区</option>
+            <option value="横浜市">横浜市</option>
+            <option value="川崎市">川崎市</option>
+            <option value="さいたま市">さいたま市</option>
+            <option value="千葉市">千葉市</option>
+          </optgroup>
+          <!-- 関西地方 -->
+          <optgroup label="関西地方">
+            <option value="大阪市">大阪市</option>
+            <option value="神戸市">神戸市</option>
+            <option value="京都市">京都市</option>
+            <option value="奈良市">奈良市</option>
+          </optgroup>
+          <!-- 中部地方 -->
+          <optgroup label="中部地方">
+            <option value="名古屋市">名古屋市</option>
+            <option value="静岡市">静岡市</option>
+            <option value="金沢市">金沢市</option>
+          </optgroup>
+          <!-- 北海道・東北 -->
+          <optgroup label="北海道・東北">
+            <option value="札幌市">札幌市</option>
+            <option value="仙台市">仙台市</option>
+            <option value="青森市">青森市</option>
+            <option value="盛岡市">盛岡市</option>
+          </optgroup>
+          <!-- 中国・四国 -->
+          <optgroup label="中国・四国">
+            <option value="広島市">広島市</option>
+            <option value="岡山市">岡山市</option>
+            <option value="松山市">松山市</option>
+            <option value="高松市">高松市</option>
+          </optgroup>
+          <!-- 九州・沖縄 -->
+          <optgroup label="九州・沖縄">
+            <option value="福岡市">福岡市</option>
+            <option value="熊本市">熊本市</option>
+            <option value="鹿児島市">鹿児島市</option>
+            <option value="那覇市">那覇市</option>
+          </optgroup>
+        </select>
       </div>
-      
-      <!-- 都道府県選択（代替オプション） -->
-      <details class="mb-6">
-        <summary class="cursor-pointer text-blue-600 hover:text-blue-800">または都道府県から選択</summary>
-        <div class="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2">
-          <button class="prefecture-btn px-2 py-1 border rounded hover:bg-blue-100" data-code="01">北海道</button>
-          <button class="prefecture-btn px-2 py-1 border rounded hover:bg-blue-100" data-code="13">東京都</button>
-          <button class="prefecture-btn px-2 py-1 border rounded hover:bg-blue-100" data-code="23">愛知県</button>
-          <button class="prefecture-btn px-2 py-1 border rounded hover:bg-blue-100" data-code="27">大阪府</button>
-          <button class="prefecture-btn px-2 py-1 border rounded hover:bg-blue-100" data-code="47">沖縄県</button>
-          <!-- 更に表示ボタン -->
-          <button id="show-all-prefectures" class="col-span-2 sm:col-span-3 md:col-span-5 text-blue-600 hover:text-blue-800 mt-2">
-            全ての都道府県を表示
-          </button>
-          <!-- 全都道府県（最初は非表示） -->
-          <div id="all-prefectures-container" class="hidden col-span-2 sm:col-span-3 md:col-span-5 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 mt-2">
-            <!-- JavaScript で動的に追加 -->
-          </div>
-        </div>
-      </details>
       
       <div class="text-center">
         <button 
