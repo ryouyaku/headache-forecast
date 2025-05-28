@@ -332,6 +332,17 @@
     </div>
 
     <script>
+        // ==================================
+        // 設定値（ここを変更してください）
+        // ==================================
+        const CONFIG = {
+            // Google Apps Script Web App URL
+            GAS_URL: 'https://script.google.com/macros/s/AKfycbzwVboZRdH9z_lhrThWLs52MFG_-oPrErICuNBiUCfXzVXoA6Ew_eBpAI46jj8NeuQDoA/exec',  // ← GASのURLをここに貼り付け
+            
+            // LINE LIFF ID
+            LIFF_ID: '2007239534-bnjnyNja'  // ← LIFF IDをここに貼り付け
+        };
+
         // 都道府県データ
         const prefectures = [
             {code: "01", name: "北海道"}, {code: "02", name: "青森県"}, {code: "03", name: "岩手県"},
@@ -352,20 +363,18 @@
             {code: "46", name: "鹿児島県"}, {code: "47", name: "沖縄県"}
         ];
 
-        // 主要都市データ
+        // 主要都市データ（一部のみ）
         const majorCities = {
-            "01": [{name: "札幌市", popular: true}, {name: "函館市"}, {name: "旭川市"}],
-            "13": [{name: "新宿区", popular: true}, {name: "渋谷区"}, {name: "港区"}, {name: "千代田区"}],
-            "27": [{name: "大阪市", popular: true}, {name: "堺市"}, {name: "東大阪市"}],
-            "40": [{name: "福岡市", popular: true}, {name: "北九州市"}, {name: "久留米市"}]
+            "01": [{name: "札幌市", popular: true}, {name: "函館市"}, {name: "旭川市"}, {name: "釧路市"}],
+            "13": [{name: "新宿区", popular: true}, {name: "渋谷区"}, {name: "港区"}, {name: "千代田区"}, {name: "中央区"}],
+            "14": [{name: "横浜市", popular: true}, {name: "川崎市"}, {name: "相模原市"}, {name: "藤沢市"}],
+            "27": [{name: "大阪市", popular: true}, {name: "堺市"}, {name: "東大阪市"}, {name: "枚方市"}],
+            "40": [{name: "福岡市", popular: true}, {name: "北九州市"}, {name: "久留米市"}, {name: "飯塚市"}]
         };
 
         // グローバル変数
         let liffInitialized = false;
         let currentWeatherData = null;
-
-        // LIFF設定
-        const LIFF_ID = "YOUR_LIFF_ID"; // ここにLIFF IDを設定
 
         // 初期化
         document.addEventListener('DOMContentLoaded', async () => {
@@ -434,11 +443,9 @@
             hideResults();
 
             try {
-                // ここでは仮のデータを使用（実際にはGAS APIを呼び出す）
-                // 実装時は weather.js の getWeatherData 関数を使用
-                const weatherData = await getWeatherDataMock(location);
+                const weatherData = await getWeatherData(location);
                 currentWeatherData = weatherData;
-                displayResults(weatherData, location);
+                displayResults(weatherData.data, location);
             } catch (error) {
                 showError(error.message);
             } finally {
@@ -446,33 +453,30 @@
             }
         }
 
-        // 仮の天気データ取得（実装時は実際のAPIに置き換える）
-        async function getWeatherDataMock(location) {
-            // デモ用のランダムデータ生成
-            await new Promise(resolve => setTimeout(resolve, 1000)); // 遅延シミュレーション
+        // 天気データ取得（実際のAPI呼び出し）
+        async function getWeatherData(location) {
+            if (!CONFIG.GAS_URL || CONFIG.GAS_URL === 'YOUR_GAS_WEB_APP_URL_HERE') {
+                throw new Error('Google Apps Script URLが設定されていません。設定を確認してください。');
+            }
 
-            return {
-                currentWeather: {
-                    weatherMain: "晴れ",
-                    temperature: Math.floor(Math.random() * 15) + 15,
-                    humidity: Math.floor(Math.random() * 30) + 50,
-                    pressure: Math.floor(Math.random() * 30) + 995
-                },
-                forecast: {
-                    today: {
-                        weather: "晴れ時々曇り",
-                        maxTemp: Math.floor(Math.random() * 10) + 20,
-                        minTemp: Math.floor(Math.random() * 10) + 10,
-                        avgPressure: Math.floor(Math.random() * 30) + 995
-                    },
-                    tomorrow: {
-                        weather: "曇り",
-                        maxTemp: Math.floor(Math.random() * 10) + 18,
-                        minTemp: Math.floor(Math.random() * 10) + 8,
-                        avgPressure: Math.floor(Math.random() * 30) + 990
-                    }
+            try {
+                const response = await fetch(`${CONFIG.GAS_URL}?city=${encodeURIComponent(location)}`);
+                
+                if (!response.ok) {
+                    throw new Error('サーバーとの通信に失敗しました');
                 }
-            };
+
+                const data = await response.json();
+                
+                if (!data.success) {
+                    throw new Error(data.error || '天気データの取得に失敗しました');
+                }
+
+                return data;
+            } catch (error) {
+                console.error('API Error:', error);
+                throw new Error('天気データの取得に失敗しました。しばらく待ってから再試行してください。');
+            }
         }
 
         // 結果表示
@@ -574,9 +578,10 @@
         // LIFF初期化
         async function initializeLiff() {
             if (typeof liff === 'undefined') return;
+            if (!CONFIG.LIFF_ID || CONFIG.LIFF_ID === 'YOUR_LIFF_ID_HERE') return;
 
             try {
-                await liff.init({ liffId: LIFF_ID });
+                await liff.init({ liffId: CONFIG.LIFF_ID });
                 liffInitialized = true;
                 
                 // LINE内でない場合はシェアボタンを非表示
