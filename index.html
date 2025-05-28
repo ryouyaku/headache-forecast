@@ -3,43 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>頭痛予報 - あなたの健康をサポート</title>
-    <meta name="description" content="気象データから頭痛リスクを予測し、事前の対策をサポートします">
+    <title>頭痛予報 - 東洋医学で健康をサポート</title>
+    <meta name="description" content="薬剤師監修・東洋医学の知恵を活かした頭痛リスク予測">
     
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
     <!-- Custom Styles -->
     <style>
-        /* グラデーション背景 */
-        .gradient-bg {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
+        /* 東洋医学をイメージした配色 */
+        :root {
+            --primary-green: #8BC34A;
+            --primary-green-dark: #689F38;
+            --primary-green-light: #AED581;
+            --accent-gold: #FFB300;
+            --zen-brown: #6D4C41;
+            --natural-beige: #F5F5DC;
+            --healing-blue: #81C784;
         }
         
-        /* カードのグラスモーフィズム効果 */
-        .glass-card {
+        /* グラデーション背景（自然をイメージ） */
+        .gradient-bg {
+            background: linear-gradient(135deg, #E8F5E9 0%, #C8E6C9 50%, #A5D6A7 100%);
+            min-height: 100vh;
+            position: relative;
+        }
+        
+        .gradient-bg::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(139, 195, 74, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.3) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        
+        /* 和紙のような質感のカード */
+        .washi-card {
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
-            border-radius: 20px;
-            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 16px;
+            box-shadow: 
+                0 4px 20px rgba(104, 159, 56, 0.15),
+                0 2px 8px rgba(0, 0, 0, 0.08);
+            border: 1px solid rgba(139, 195, 74, 0.2);
             transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
         
-        .glass-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.45);
+        .washi-card::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(139, 195, 74, 0.03) 0%, transparent 70%);
+            pointer-events: none;
         }
         
-        /* ローディングアニメーション */
+        .washi-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 
+                0 8px 30px rgba(104, 159, 56, 0.2),
+                0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* ローディングアニメーション（陰陽をイメージ） */
         .loader {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #667eea;
-            border-radius: 50%;
             width: 40px;
             height: 40px;
-            animation: spin 1s linear infinite;
+            border: 3px solid #E8F5E9;
+            border-top: 3px solid var(--primary-green);
+            border-right: 3px solid var(--primary-green-dark);
+            border-radius: 50%;
+            animation: spin 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite;
         }
         
         @keyframes spin {
@@ -47,12 +90,13 @@
             100% { transform: rotate(360deg); }
         }
         
-        /* ボタンアニメーション */
+        /* プライマリボタン（自然な緑） */
         .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, var(--primary-green) 0%, var(--primary-green-dark) 100%);
             transition: all 0.3s ease;
             position: relative;
             overflow: hidden;
+            box-shadow: 0 4px 15px rgba(139, 195, 74, 0.3);
         }
         
         .btn-primary::before {
@@ -62,7 +106,7 @@
             left: -100%;
             width: 100%;
             height: 100%;
-            background: rgba(255, 255, 255, 0.3);
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
             transition: left 0.5s ease;
         }
         
@@ -72,47 +116,99 @@
         
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 6px 20px rgba(139, 195, 74, 0.4);
         }
         
-        /* リスクレベルのスタイル */
+        /* リスクレベルのスタイル（東洋医学カラー） */
         .risk-very-high {
-            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            background: linear-gradient(135deg, #FF7043 0%, #FF5722 100%);
             color: white;
+            box-shadow: 0 4px 15px rgba(255, 87, 34, 0.3);
         }
         
         .risk-high {
-            background: linear-gradient(135deg, #ffa94d 0%, #ff8cc3 100%);
+            background: linear-gradient(135deg, #FFB74D 0%, #FF9800 100%);
             color: white;
+            box-shadow: 0 4px 15px rgba(255, 152, 0, 0.3);
         }
         
         .risk-medium {
-            background: linear-gradient(135deg, #ffd93d 0%, #ffc947 100%);
-            color: #333;
+            background: linear-gradient(135deg, #FFD54F 0%, #FFC107 100%);
+            color: #5D4037;
+            box-shadow: 0 4px 15px rgba(255, 193, 7, 0.3);
         }
         
         .risk-low {
-            background: linear-gradient(135deg, #6bcf7f 0%, #52d170 100%);
+            background: linear-gradient(135deg, var(--primary-green-light) 0%, var(--primary-green) 100%);
             color: white;
+            box-shadow: 0 4px 15px rgba(139, 195, 74, 0.3);
+        }
+        
+        /* リスク画像のスタイル */
+        .risk-image {
+            width: 120px;
+            height: 120px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 4px solid rgba(255, 255, 255, 0.9);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            margin: 0 auto 1rem;
         }
         
         /* フェードインアニメーション */
         .fade-in {
-            animation: fadeIn 0.5s ease-in;
+            animation: fadeIn 0.6s ease-in;
         }
         
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+            from { 
+                opacity: 0; 
+                transform: translateY(20px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
         }
         
         /* セレクトボックスのカスタマイズ */
         select {
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23689F38' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
             background-position: right 0.5rem center;
             background-repeat: no-repeat;
             background-size: 1.5em 1.5em;
             padding-right: 2.5rem;
+            border-color: var(--primary-green-light);
+        }
+        
+        select:focus {
+            border-color: var(--primary-green);
+            box-shadow: 0 0 0 3px rgba(139, 195, 74, 0.1);
+        }
+        
+        /* 東洋医学テーマのアクセント */
+        .oriental-pattern {
+            position: absolute;
+            opacity: 0.03;
+            pointer-events: none;
+        }
+        
+        /* 和風の見出し装飾 */
+        .heading-oriental {
+            position: relative;
+            padding-left: 1.5rem;
+        }
+        
+        .heading-oriental::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 80%;
+            background: linear-gradient(180deg, var(--primary-green) 0%, var(--primary-green-dark) 100%);
+            border-radius: 2px;
         }
     </style>
     
@@ -123,20 +219,22 @@
     <div class="container mx-auto px-4 py-8 max-w-4xl">
         <!-- ヘッダー -->
         <header class="text-center mb-8">
-            <h1 class="text-4xl md:text-5xl font-bold text-white mb-4 drop-shadow-lg">
-                🌤️ 頭痛予報
+            <div class="inline-block p-4 rounded-full bg-white shadow-lg mb-4">
+                <span class="text-5xl">🌿</span>
+            </div>
+            <h1 class="text-4xl md:text-5xl font-bold text-gray-800 mb-4">
+                頭痛予報
             </h1>
-            <p class="text-white text-lg opacity-90">
-                天気の変化による頭痛リスクを事前にお知らせ
+            <p class="text-gray-700 text-lg">
+                薬剤師監修・東洋医学の知恵で健康をサポート
             </p>
         </header>
 
         <!-- メインカード -->
-        <div class="glass-card p-6 md:p-8 mb-6">
+        <div class="washi-card p-6 md:p-8 mb-6">
             <!-- 地域選択 -->
             <div class="mb-8">
-                <h2 class="text-2xl font-bold text-gray-800 mb-6 flex items-center">
-                    <span class="mr-3">📍</span>
+                <h2 class="heading-oriental text-2xl font-bold text-gray-800 mb-6">
                     地域を選択
                 </h2>
                 
@@ -145,7 +243,7 @@
                         <label class="block text-gray-700 font-medium mb-2">
                             都道府県 <span class="text-red-500">*</span>
                         </label>
-                        <select id="prefecture" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none transition-colors">
+                        <select id="prefecture" class="w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors">
                             <option value="">選択してください</option>
                         </select>
                     </div>
@@ -154,21 +252,10 @@
                         <label class="block text-gray-700 font-medium mb-2">
                             市区町村 <span class="text-gray-400 text-sm">(任意)</span>
                         </label>
-                        <select id="city" class="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-purple-500 focus:outline-none transition-colors" disabled>
+                        <select id="city" class="w-full px-4 py-3 border-2 rounded-lg focus:outline-none transition-colors" disabled>
                             <option value="">都道府県を選択すると表示されます</option>
                         </select>
                     </div>
-                </div>
-                
-                <!-- 現在地取得ボタン -->
-                <div class="mt-4 text-center">
-                    <button id="location-btn" class="text-purple-600 hover:text-purple-800 text-sm font-medium transition-colors">
-                        <svg class="inline-block w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                        </svg>
-                        現在地から検索
-                    </button>
                 </div>
                 
                 <!-- 検索ボタン -->
@@ -178,7 +265,7 @@
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                             </svg>
-                            頭痛予報を見る
+                            頭痛リスクを診断
                         </span>
                     </button>
                 </div>
@@ -187,15 +274,16 @@
 
         <!-- ローディング -->
         <div id="loading" class="hidden">
-            <div class="glass-card p-8 text-center">
+            <div class="washi-card p-8 text-center">
                 <div class="loader mx-auto mb-4"></div>
-                <p class="text-gray-700 text-lg">天気データを取得中...</p>
+                <p class="text-gray-700 text-lg">診断中...</p>
+                <p class="text-gray-600 text-sm mt-2">天気データを分析しています</p>
             </div>
         </div>
 
         <!-- エラーメッセージ -->
         <div id="error" class="hidden">
-            <div class="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg">
+            <div class="bg-red-50 border-l-4 border-red-400 p-4 rounded-lg">
                 <div class="flex items-center">
                     <svg class="w-6 h-6 text-red-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
@@ -211,30 +299,33 @@
         <!-- 結果表示 -->
         <div id="results" class="hidden space-y-6">
             <!-- 頭痛リスク -->
-            <div class="glass-card p-6 fade-in">
-                <h2 class="text-2xl font-bold text-gray-800 mb-4">
-                    <span id="location-name"></span>の頭痛予報
+            <div class="washi-card p-6 fade-in">
+                <h2 class="heading-oriental text-2xl font-bold text-gray-800 mb-6">
+                    <span id="location-name"></span>の診断結果
                 </h2>
                 
                 <div id="risk-level" class="p-6 rounded-xl text-center mb-6">
-                    <div class="text-6xl mb-4" id="risk-emoji"></div>
+                    <img id="risk-image" class="risk-image" src="" alt="リスクレベル">
                     <h3 class="text-3xl font-bold mb-2" id="risk-text"></h3>
                     <p class="text-lg opacity-90" id="risk-description"></p>
                 </div>
                 
-                <div class="bg-blue-50 p-4 rounded-lg">
-                    <h4 class="font-bold text-blue-800 mb-2">💡 アドバイス</h4>
-                    <p id="risk-advice" class="text-blue-700"></p>
+                <div class="bg-green-50 p-4 rounded-lg border border-green-200">
+                    <h4 class="font-bold text-green-800 mb-2 flex items-center">
+                        <span class="mr-2">💊</span>
+                        薬剤師からのアドバイス
+                    </h4>
+                    <p id="risk-advice" class="text-green-700 leading-relaxed"></p>
                 </div>
             </div>
             
             <!-- 天気詳細 -->
-            <div class="glass-card p-6 fade-in">
-                <h3 class="text-xl font-bold text-gray-800 mb-4">🌡️ 天気詳細</h3>
+            <div class="washi-card p-6 fade-in">
+                <h3 class="heading-oriental text-xl font-bold text-gray-800 mb-4">気象データ</h3>
                 
                 <div class="grid md:grid-cols-3 gap-4">
                     <!-- 現在の天気 -->
-                    <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-lg">
+                    <div class="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-lg border border-green-200">
                         <h4 class="font-semibold text-gray-700 mb-3">現在</h4>
                         <div class="space-y-2 text-sm">
                             <div class="flex justify-between">
@@ -247,7 +338,7 @@
                             </div>
                             <div class="flex justify-between">
                                 <span>気圧:</span>
-                                <span id="current-pressure" class="font-medium text-red-600"></span>
+                                <span id="current-pressure" class="font-medium text-orange-600"></span>
                             </div>
                             <div class="flex justify-between">
                                 <span>湿度:</span>
@@ -257,7 +348,7 @@
                     </div>
                     
                     <!-- 今日の予報 -->
-                    <div class="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-lg">
+                    <div class="bg-gradient-to-br from-yellow-50 to-amber-100 p-4 rounded-lg border border-amber-200">
                         <h4 class="font-semibold text-gray-700 mb-3">今日</h4>
                         <div class="space-y-2 text-sm">
                             <div class="flex justify-between">
@@ -279,7 +370,7 @@
                     </div>
                     
                     <!-- 明日の予報 -->
-                    <div class="bg-gradient-to-br from-purple-50 to-purple-100 p-4 rounded-lg">
+                    <div class="bg-gradient-to-br from-blue-50 to-indigo-100 p-4 rounded-lg border border-indigo-200">
                         <h4 class="font-semibold text-gray-700 mb-3">明日</h4>
                         <div class="space-y-2 text-sm">
                             <div class="flex justify-between">
@@ -302,32 +393,26 @@
                 </div>
             </div>
             
-            <!-- アクションボタン -->
-            <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <button id="share-btn" class="btn-primary text-white px-6 py-3 rounded-full font-medium shadow-lg">
-                    <span class="flex items-center justify-center">
-                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
-                        </svg>
-                        LINEで共有
-                    </span>
-                </button>
-                
+            <!-- もう一度調べるボタン -->
+            <div class="text-center">
                 <button onclick="location.reload()" class="bg-gray-500 hover:bg-gray-600 text-white px-6 py-3 rounded-full font-medium shadow-lg transition-colors">
                     <span class="flex items-center justify-center">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                         </svg>
-                        もう一度調べる
+                        もう一度診断する
                     </span>
                 </button>
             </div>
         </div>
 
         <!-- フッター -->
-        <footer class="mt-12 text-center text-white text-sm opacity-80">
-            <p>⚠️ この予報は参考情報です。医療的な診断ではありません。</p>
-            <p class="mt-2">Powered by OpenWeatherMap</p>
+        <footer class="mt-12 text-center text-gray-700 text-sm">
+            <div class="inline-block p-4 bg-white bg-opacity-80 rounded-lg">
+                <p>⚠️ この診断は気象データに基づく参考情報です</p>
+                <p class="mt-1">症状が続く場合は医療機関を受診してください</p>
+                <p class="mt-3 text-xs text-gray-600">Powered by OpenWeatherMap</p>
+            </div>
         </footer>
     </div>
 
@@ -340,7 +425,14 @@
             GAS_URL: 'https://script.google.com/macros/s/AKfycbzwVboZRdH9z_lhrThWLs52MFG_-oPrErICuNBiUCfXzVXoA6Ew_eBpAI46jj8NeuQDoA/exec',  // ← GASのURLをここに貼り付け
             
             // LINE LIFF ID
-            LIFF_ID: '2007239534-bnjnyNja'  // ← LIFF IDをここに貼り付け
+            LIFF_ID: '2007239534-bnjnyNja',  // ← LIFF IDをここに貼り付け
+            
+            // リスクレベルに応じた画像URL（GitHubにアップロード後のURL）
+            RISK_IMAGES: {
+                high: 'images/risk-high.jpg',     // ← 高リスク画像のパス
+                medium: 'images/risk-medium.jpg', // ← 中リスク画像のパス
+                low: 'images/risk-low.jpg'        // ← 低リスク画像のパス
+            }
         };
 
         // 都道府県データ
@@ -375,6 +467,7 @@
         // グローバル変数
         let liffInitialized = false;
         let currentWeatherData = null;
+        let currentRiskData = null;
 
         // 初期化
         document.addEventListener('DOMContentLoaded', async () => {
@@ -398,8 +491,6 @@
         function setupEventListeners() {
             document.getElementById('prefecture').addEventListener('change', handlePrefectureChange);
             document.getElementById('search-btn').addEventListener('click', searchWeather);
-            document.getElementById('share-btn').addEventListener('click', shareToLine);
-            document.getElementById('location-btn').addEventListener('click', getCurrentLocation);
         }
 
         // 都道府県変更時の処理
@@ -446,6 +537,13 @@
                 const weatherData = await getWeatherData(location);
                 currentWeatherData = weatherData;
                 displayResults(weatherData.data, location);
+                
+                // 自動でLINEに送信（LINEアプリ内の場合）
+                if (liffInitialized && liff.isInClient()) {
+                    setTimeout(() => {
+                        sendResultToLine();
+                    }, 1000);
+                }
             } catch (error) {
                 showError(error.message);
             } finally {
@@ -455,7 +553,7 @@
 
         // 天気データ取得（実際のAPI呼び出し）
         async function getWeatherData(location) {
-            if (!CONFIG.GAS_URL || CONFIG.GAS_URL === 'YOUR_GAS_WEB_APP_URL_HERE') {
+            if (!CONFIG.GAS_URL || CONFIG.GAS_URL === 'https://script.google.com/macros/s/AKfycbzwVboZRdH9z_lhrThWLs52MFG_-oPrErICuNBiUCfXzVXoA6Ew_eBpAI46jj8NeuQDoA/exec') {
                 throw new Error('Google Apps Script URLが設定されていません。設定を確認してください。');
             }
 
@@ -504,15 +602,16 @@
 
             // 頭痛リスク計算
             const risk = calculateHeadacheRisk(data.currentWeather.pressure, data.currentWeather.weatherMain);
+            currentRiskData = risk;
             displayRisk(risk);
 
             showResults();
         }
 
-        // 頭痛リスク計算
+        // 頭痛リスク計算（東洋医学的アプローチ）
         function calculateHeadacheRisk(pressure, weather) {
             let score = 0;
-            let level, emoji, text, description, advice, className;
+            let level, text, description, advice, className, imageKey;
 
             // 気圧によるリスク計算
             if (pressure < 990) {
@@ -533,35 +632,35 @@
             // リスクレベル判定
             if (score >= 8) {
                 level = "非常に高い";
-                emoji = "😰";
                 text = "頭痛リスク：非常に高い";
-                description = "激しい頭痛が起こる可能性があります";
-                advice = "無理をせず、薬を準備し、十分な休息を取りましょう。水分補給も忘れずに。";
+                description = "気血の巡りが悪くなりやすい状態です";
+                advice = "血行を促進する温かい飲み物（生姜湯など）をお勧めします。首・肩のツボ（風池・肩井）を優しく押してください。無理をせず、十分な休息を。";
                 className = "risk-very-high";
+                imageKey = "high";
             } else if (score >= 6) {
                 level = "高い";
-                emoji = "😟";
                 text = "頭痛リスク：高い";
-                description = "頭痛が起こりやすい状態です";
-                advice = "激しい運動は避け、こまめに休憩を取りましょう。頭痛薬を携帯することをお勧めします。";
+                description = "気の流れが滞りやすい状態です";
+                advice = "深呼吸で気を巡らせましょう。百会（頭頂部）のツボを軽く刺激し、温かいハーブティーで体を温めてください。激しい運動は控えめに。";
                 className = "risk-high";
+                imageKey = "high";
             } else if (score >= 3) {
                 level = "中程度";
-                emoji = "😐";
                 text = "頭痛リスク：中程度";
-                description = "軽い頭痛の可能性があります";
-                advice = "通常通りの生活で問題ありませんが、疲れを感じたら休憩を取りましょう。";
+                description = "やや体調に注意が必要です";
+                advice = "適度な運動で気血の流れを良くしましょう。太陽（こめかみ）のツボをやさしくマッサージすると効果的です。規則正しい生活を心がけてください。";
                 className = "risk-medium";
+                imageKey = "medium";
             } else {
                 level = "低い";
-                emoji = "😊";
                 text = "頭痛リスク：低い";
-                description = "頭痛の心配は少ないでしょう";
-                advice = "良好な状態です。普段通りの生活を楽しみましょう。";
+                description = "体の陰陽バランスが良好です";
+                advice = "良い状態を保つため、規則正しい生活リズムを維持しましょう。季節の食材を取り入れ、自然と調和した生活を心がけてください。";
                 className = "risk-low";
+                imageKey = "low";
             }
 
-            return { level, emoji, text, description, advice, className };
+            return { level, text, description, advice, className, imageKey };
         }
 
         // リスク表示
@@ -569,7 +668,11 @@
             const riskLevel = document.getElementById('risk-level');
             riskLevel.className = `p-6 rounded-xl text-center mb-6 ${risk.className}`;
             
-            document.getElementById('risk-emoji').textContent = risk.emoji;
+            // 画像設定
+            const riskImage = document.getElementById('risk-image');
+            riskImage.src = CONFIG.RISK_IMAGES[risk.imageKey];
+            riskImage.alt = `頭痛リスク：${risk.level}`;
+            
             document.getElementById('risk-text').textContent = risk.text;
             document.getElementById('risk-description').textContent = risk.description;
             document.getElementById('risk-advice').textContent = risk.advice;
@@ -578,26 +681,20 @@
         // LIFF初期化
         async function initializeLiff() {
             if (typeof liff === 'undefined') return;
-            if (!CONFIG.LIFF_ID || CONFIG.LIFF_ID === 'YOUR_LIFF_ID_HERE') return;
+            if (!CONFIG.LIFF_ID || CONFIG.LIFF_ID === '2007239534-bnjnyNja') return;
 
             try {
                 await liff.init({ liffId: CONFIG.LIFF_ID });
                 liffInitialized = true;
-                
-                // LINE内でない場合はシェアボタンを非表示
-                if (!liff.isInClient()) {
-                    document.getElementById('share-btn').style.display = 'none';
-                }
+                console.log('LIFF initialized successfully');
             } catch (error) {
                 console.error('LIFF初期化エラー:', error);
-                document.getElementById('share-btn').style.display = 'none';
             }
         }
 
-        // LINEで共有
-        async function shareToLine() {
+        // LINEに自動送信
+        async function sendResultToLine() {
             if (!liffInitialized || !liff.isInClient()) {
-                alert('この機能はLINE内でのみ使用できます');
                 return;
             }
 
@@ -606,42 +703,16 @@
                 const riskText = document.getElementById('risk-text').textContent;
                 const advice = document.getElementById('risk-advice').textContent;
 
-                await liff.shareTargetPicker([{
+                const message = {
                     type: 'text',
-                    text: `【頭痛予報】\n📍${location}\n${riskText}\n\n💡アドバイス\n${advice}\n\n🌤️頭痛予報アプリで確認`
-                }]);
+                    text: `【頭痛予報 - 診断結果】\n\n📍${location}\n${riskText}\n\n🌿東洋医学的アドバイス\n${advice}\n\n━━━━━━━━━━\n薬剤師監修・頭痛予報アプリ`
+                };
+
+                await liff.sendMessages([message]);
+                console.log('診断結果をLINEに送信しました');
             } catch (error) {
-                console.error('共有エラー:', error);
-                alert('共有に失敗しました');
+                console.error('送信エラー:', error);
             }
-        }
-
-        // 現在地取得
-        async function getCurrentLocation() {
-            if (!navigator.geolocation) {
-                alert('お使いのブラウザは位置情報に対応していません');
-                return;
-            }
-
-            const btn = document.getElementById('location-btn');
-            btn.disabled = true;
-            btn.textContent = '取得中...';
-
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    // 位置情報から都道府県を推定（簡易版）
-                    // 実際にはReverse Geocoding APIを使用
-                    document.getElementById('prefecture').value = '13'; // 東京都をデフォルト
-                    handlePrefectureChange();
-                    btn.disabled = false;
-                    btn.innerHTML = '<svg class="inline-block w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>現在地から検索';
-                },
-                (error) => {
-                    alert('位置情報の取得に失敗しました');
-                    btn.disabled = false;
-                    btn.innerHTML = '<svg class="inline-block w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>現在地から検索';
-                }
-            );
         }
 
         // UI表示制御
